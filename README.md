@@ -36,6 +36,13 @@ Research code for TRACE: a failure-aware correction layer for autonomous inciden
 
 TRACE audit traces are under `results/traces/`.
 
+## Inspecting precomputed results
+
+All result tables and JSONL outputs are precomputed and can be inspected directly without
+running the experiment. No API key is required to verify reported numbers or recompute
+Table 8 agreement from the annotation CSVs.
+
+
 ## Annotation utilities
 
 To regenerate or prefill annotation templates from trace files:
@@ -51,6 +58,8 @@ python evaluation/aggregate_results.py
 ```
 
 ## Running
+
+Requires an OpenAI API key (GPT-4o):
 
 ```bash
 pip install -r requirements.txt
