@@ -1,0 +1,12 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L1_07",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-NET-001",
+      "resolution": "Reset affected network route",
+      "confidence": 0.91
+    }
+  }
+}

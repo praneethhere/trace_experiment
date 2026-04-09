@@ -1,0 +1,13 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L3_14",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-STALE-001",
+      "resolution": "Deprecated mitigation surfaced",
+      "confidence": 0.89,
+      "deprecated": true
+    }
+  }
+}

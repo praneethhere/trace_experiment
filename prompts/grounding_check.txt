@@ -1,0 +1,8 @@
+You are a claim verifier. Given a candidate claim and a set of evidence items, determine whether the claim is supported.
+
+Claim: {claim}
+
+Evidence:
+{evidence}
+
+Answer with exactly one word: SUPPORTED or UNSUPPORTED.

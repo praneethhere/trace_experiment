@@ -1,0 +1,14 @@
+{
+  "llm_entailment": {
+    "task_success": 76.0,
+    "halluc_incidence": 9.6,
+    "f2_precision": 0.82,
+    "f2_recall": 0.79
+  },
+  "keyword_heuristic": {
+    "task_success": 72.0,
+    "halluc_incidence": 11.1,
+    "f2_precision": 0.61,
+    "f2_recall": 0.57
+  }
+}

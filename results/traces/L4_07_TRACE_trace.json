@@ -1,0 +1,57 @@
+{
+  "task_id": "L4_07",
+  "system": "TRACE",
+  "start_time": "2026-04-07T00:00:00Z",
+  "steps": [
+    {
+      "step": 0,
+      "reasoning": "The issue is being investigated through check_network_status based on the observed incident evidence.",
+      "tool_id": "check_network_status",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "packet_loss": 87.0,
+          "route_flap": "gw-east-2",
+          "path_state": "partitioned"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "reasoning": "[TOOL_SWITCH] Adjust next step using current evidence.",
+      "tool_id": "tool_switch",
+      "tool_status": "success",
+      "observation": {}
+    },
+    {
+      "step": 2,
+      "reasoning": "The issue is being investigated through check_network_status based on the observed incident evidence.",
+      "tool_id": "check_network_status",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "packet_loss": 87.0,
+          "route_flap": "gw-east-2",
+          "path_state": "partitioned"
+        }
+      }
+    }
+  ],
+  "failure_events": [
+    {
+      "step": 2,
+      "state": "s_HE"
+    }
+  ],
+  "recovery_events": [
+    {
+      "step": 2,
+      "policy": "halt",
+      "outcome": "escalated"
+    }
+  ],
+  "terminal_state": "s_HE",
+  "goal_satisfied": false
+}

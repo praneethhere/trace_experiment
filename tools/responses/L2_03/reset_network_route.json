@@ -1,0 +1,11 @@
+{
+  "tool": "reset_network_route",
+  "task_id": "L2_03",
+  "response": {
+    "status": "success",
+    "data": {
+      "action": "reset_network_route",
+      "result": "completed"
+    }
+  }
+}

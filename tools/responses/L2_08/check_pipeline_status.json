@@ -1,0 +1,12 @@
+{
+  "tool": "check_pipeline_status",
+  "task_id": "L2_08",
+  "response": {
+    "status": "success",
+    "data": {
+      "pipeline_status": "failed",
+      "failing_stage": "health_gate",
+      "affected_build": "unstable"
+    }
+  }
+}

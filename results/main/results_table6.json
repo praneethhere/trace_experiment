@@ -1,0 +1,32 @@
+{
+  "vanilla_react": {
+    "task_success_rate": 62.0,
+    "hallucination_incidence": 19.4,
+    "loop_frequency": 12.1,
+    "recovery_success_rate": null,
+    "time_to_recovery": null,
+    "tool_call_efficiency": 0.56,
+    "safe_escalation_accuracy": null,
+    "correction_overhead": 0.0
+  },
+  "self_reflection": {
+    "task_success_rate": 68.0,
+    "hallucination_incidence": 15.8,
+    "loop_frequency": 9.8,
+    "recovery_success_rate": null,
+    "time_to_recovery": null,
+    "tool_call_efficiency": 0.6,
+    "safe_escalation_accuracy": null,
+    "correction_overhead": 1.5
+  },
+  "TRACE": {
+    "task_success_rate": 76.0,
+    "hallucination_incidence": 9.6,
+    "loop_frequency": 4.8,
+    "recovery_success_rate": 68.0,
+    "time_to_recovery": 2.1,
+    "tool_call_efficiency": 0.71,
+    "safe_escalation_accuracy": 81.7,
+    "correction_overhead": 2.7
+  }
+}

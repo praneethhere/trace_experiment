@@ -1,0 +1,56 @@
+{
+  "package_type": "full_end_to_end_trace_experiment_bundle",
+  "task_count": 50,
+  "systems": [
+    "vanilla_react",
+    "self_reflection",
+    "TRACE"
+  ],
+  "ablation_variants": [
+    "TRACE_full",
+    "TRACE_minus_monitor",
+    "TRACE_minus_attribution",
+    "TRACE_minus_recovery",
+    "TRACE_minus_audit",
+    "llm_entailment",
+    "keyword_heuristic",
+    "k3",
+    "k5",
+    "k7",
+    "k10"
+  ],
+  "summary_tables": [
+    "results/main/results_table6.json",
+    "results/main/results_table7.json",
+    "results/main/results_table8.json",
+    "results/ablation/results_table9.json",
+    "results/ablation/results_table10.json",
+    "results/ablation/results_table11.json"
+  ],
+  "task_level_results": {
+    "main": [
+      "results/main/vanilla_react_results.jsonl",
+      "results/main/self_reflection_results.jsonl",
+      "results/main/TRACE_results.jsonl"
+    ],
+    "ablation": [
+      "results/ablation/TRACE_full_results.jsonl",
+      "results/ablation/TRACE_minus_monitor_results.jsonl",
+      "results/ablation/TRACE_minus_attribution_results.jsonl",
+      "results/ablation/TRACE_minus_recovery_results.jsonl",
+      "results/ablation/TRACE_minus_audit_results.jsonl",
+      "results/ablation/llm_entailment_results.jsonl",
+      "results/ablation/keyword_heuristic_results.jsonl",
+      "results/ablation/k3_results.jsonl",
+      "results/ablation/k5_results.jsonl",
+      "results/ablation/k7_results.jsonl",
+      "results/ablation/k10_results.jsonl"
+    ]
+  },
+  "trace_files": 50,
+  "annotation_rows": {
+    "hallucination_labels": 73,
+    "contradiction_labels": 89,
+    "escalation_labels": 88
+  }
+}

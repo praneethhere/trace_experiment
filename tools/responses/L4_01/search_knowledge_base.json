@@ -1,0 +1,12 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L4_01",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-DB-001",
+      "resolution": "Restart connection pool",
+      "confidence": 0.94
+    }
+  }
+}

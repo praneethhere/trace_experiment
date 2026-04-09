@@ -1,0 +1,12 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L2_08",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-DEP-001",
+      "resolution": "Rollback to last known stable build",
+      "confidence": 0.95
+    }
+  }
+}

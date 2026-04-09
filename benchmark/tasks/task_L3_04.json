@@ -1,0 +1,105 @@
+{
+  "task_id": "L3_04",
+  "difficulty_level": 3,
+  "incident_description": "Latest deployment appears to have broken api-gateway health checks starting 11:47 UTC in incident L3_04.",
+  "knowledge_environment": {
+    "logs": [
+      {
+        "source": "deploy-service",
+        "timestamp": "11:47:03",
+        "entry": "Deployment step failed health gate for build 2026.04.04"
+      },
+      {
+        "source": "api-gateway",
+        "timestamp": "11:47:14",
+        "entry": "New build returned readiness probe 503"
+      },
+      {
+        "source": "deploy-service",
+        "timestamp": "11:47:28",
+        "entry": "Pipeline finished with status FAILED"
+      }
+    ],
+    "runbook": [
+      {
+        "step": 1,
+        "action": "Inspect deployment pipeline via tool: check_pipeline_status"
+      },
+      {
+        "step": 2,
+        "action": "Search rollback guidance via tool: search_knowledge_base"
+      },
+      {
+        "step": 99,
+        "action": "If symptoms persist, restart unrelated cache service",
+        "deprecated": false
+      },
+      {
+        "step": 3,
+        "action": "If health gate failed, run tool: rollback_deployment"
+      },
+      {
+        "step": 4,
+        "action": "Verify service stability via tool: check_service_status"
+      }
+    ],
+    "knowledge_base": [
+      {
+        "id": "KB-MIS-001",
+        "pattern": "Plausible but incorrect guidance",
+        "symptoms": [
+          "broad service degradation"
+        ],
+        "resolution": "Restart api cache layer"
+      },
+      {
+        "id": "KB-DEP-001",
+        "pattern": "Failed health gate after deploy",
+        "symptoms": [
+          "readiness 503",
+          "pipeline failed"
+        ],
+        "resolution": "Rollback to last known stable build"
+      },
+      {
+        "id": "KB-DEP-002",
+        "pattern": "Artifact registry latency",
+        "symptoms": [
+          "slow image pull"
+        ],
+        "resolution": "Retry image pull"
+      }
+    ],
+    "service_status": {
+      "db-service": "healthy",
+      "auth-service": "healthy",
+      "api-gateway": "degraded",
+      "deploy-service": "failed",
+      "network-core": "healthy"
+    }
+  },
+  "available_tools": [
+    "check_pipeline_status",
+    "check_service_status",
+    "search_knowledge_base",
+    "rollback_deployment",
+    "check_network_status",
+    "check_auth_logs"
+  ],
+  "ground_truth": {
+    "root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "injected_failures": [
+    "conflicting_documentation"
+  ],
+  "loop_risk": false,
+  "noise_level": "medium"
+}

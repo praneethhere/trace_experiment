@@ -1,0 +1,81 @@
+{
+  "task_id": "L3_01",
+  "system": "TRACE",
+  "start_time": "2026-04-07T00:00:00Z",
+  "steps": [
+    {
+      "step": 0,
+      "reasoning": "The issue is being investigated through check_db_connections based on the observed incident evidence.",
+      "tool_id": "check_db_connections",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "active_connections": 500,
+          "max_connections": 500,
+          "pool_status": "exhausted",
+          "wait_queue_length": 47
+        }
+      }
+    },
+    {
+      "step": 1,
+      "reasoning": "The issue is being investigated through search_knowledge_base based on the observed incident evidence.",
+      "tool_id": "search_knowledge_base",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "top_match": "KB-MIS-001",
+          "resolution": "Restart api cache layer",
+          "confidence": 0.88,
+          "note": "conflicts with direct evidence"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "reasoning": "[REPLAN] Adjust next step using current evidence.",
+      "tool_id": "replan",
+      "tool_status": "success",
+      "observation": {}
+    },
+    {
+      "step": 3,
+      "reasoning": "The issue is being investigated through restart_connection_pool based on the observed incident evidence.",
+      "tool_id": "restart_connection_pool",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "action": "restart_connection_pool",
+          "result": "completed"
+        }
+      }
+    },
+    {
+      "step": 4,
+      "reasoning": "The issue is being investigated through check_service_status based on the observed incident evidence.",
+      "tool_id": "check_service_status",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "db-service": "healthy",
+          "api-gateway": "healthy",
+          "recovery_verified": true
+        }
+      }
+    }
+  ],
+  "failure_events": [],
+  "recovery_events": [
+    {
+      "step": 2,
+      "policy": "replan",
+      "outcome": "attempted"
+    }
+  ],
+  "terminal_state": "s_OK",
+  "goal_satisfied": true
+}

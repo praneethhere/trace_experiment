@@ -1,0 +1,12 @@
+{
+  "tool": "check_db_connections",
+  "task_id": "L2_10",
+  "response": {
+    "status": "success",
+    "data": {
+      "pool_status": "normal",
+      "active_connections": 124,
+      "max_connections": 500
+    }
+  }
+}

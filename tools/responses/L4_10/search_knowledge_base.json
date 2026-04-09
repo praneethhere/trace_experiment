@@ -1,0 +1,12 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L4_10",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-AUTH-001",
+      "resolution": "Refresh signing material and restart auth service",
+      "confidence": 0.92
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "task_id": "L4_09",
+  "system": "TRACE",
+  "start_time": "2026-04-07T00:00:00Z",
+  "steps": [
+    {
+      "step": 0,
+      "reasoning": "The issue is being investigated through check_db_connections based on the observed incident evidence.",
+      "tool_id": "check_db_connections",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "active_connections": 500,
+          "max_connections": 500,
+          "pool_status": "exhausted",
+          "wait_queue_length": 47
+        }
+      }
+    },
+    {
+      "step": 1,
+      "reasoning": "[TOOL_SWITCH] Adjust next step using current evidence.",
+      "tool_id": "tool_switch",
+      "tool_status": "success",
+      "observation": {}
+    },
+    {
+      "step": 2,
+      "reasoning": "The issue is being investigated through check_db_connections based on the observed incident evidence.",
+      "tool_id": "check_db_connections",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "active_connections": 500,
+          "max_connections": 500,
+          "pool_status": "exhausted",
+          "wait_queue_length": 47
+        }
+      }
+    }
+  ],
+  "failure_events": [
+    {
+      "step": 2,
+      "state": "s_HE"
+    }
+  ],
+  "recovery_events": [
+    {
+      "step": 2,
+      "policy": "halt",
+      "outcome": "escalated"
+    }
+  ],
+  "terminal_state": "s_HE",
+  "goal_satisfied": false
+}

@@ -1,0 +1,8 @@
+{
+  "tool": "check_db_connections",
+  "task_id": "L4_01",
+  "response": {
+    "status": "timeout",
+    "message": "Injected intermittent tool timeout"
+  }
+}

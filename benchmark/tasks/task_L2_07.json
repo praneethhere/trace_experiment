@@ -1,0 +1,88 @@
+{
+  "task_id": "L2_07",
+  "difficulty_level": 2,
+  "incident_description": "API requests are intermittently failing due to backend reachability errors since 16:04 UTC in incident L2_07.",
+  "knowledge_environment": {
+    "logs": [
+      {
+        "source": "network-core",
+        "timestamp": "16:04:02",
+        "entry": "Packet loss above 85% on east-west route segment"
+      },
+      {
+        "source": "api-gateway",
+        "timestamp": "16:04:10",
+        "entry": "TCP connect timeout to db-service:5432"
+      }
+    ],
+    "runbook": [
+      {
+        "step": 1,
+        "action": "Inspect network path health via tool: check_network_status"
+      },
+      {
+        "step": 2,
+        "action": "Search routing incidents via tool: search_knowledge_base"
+      },
+      {
+        "step": 3,
+        "action": "If route flap confirmed, run tool: reset_network_route"
+      },
+      {
+        "step": 4,
+        "action": "Verify service connectivity via tool: check_service_status"
+      }
+    ],
+    "knowledge_base": [
+      {
+        "id": "KB-NET-001",
+        "pattern": "Route partition",
+        "symptoms": [
+          "packet loss",
+          "tcp timeout",
+          "route flap"
+        ],
+        "resolution": "Reset affected network route"
+      },
+      {
+        "id": "KB-NET-002",
+        "pattern": "DNS propagation delay",
+        "symptoms": [
+          "name resolution failures"
+        ],
+        "resolution": "Flush resolver cache"
+      }
+    ],
+    "service_status": {
+      "db-service": "unknown",
+      "auth-service": "healthy",
+      "api-gateway": "degraded",
+      "deploy-service": "healthy",
+      "network-core": "degraded"
+    }
+  },
+  "available_tools": [
+    "check_network_status",
+    "check_service_status",
+    "search_knowledge_base",
+    "reset_network_route",
+    "check_db_connections",
+    "check_auth_logs"
+  ],
+  "ground_truth": {
+    "root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "injected_failures": [
+    "incomplete_logs"
+  ],
+  "loop_risk": false,
+  "noise_level": "low"
+}

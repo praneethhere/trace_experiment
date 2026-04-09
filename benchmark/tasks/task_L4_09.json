@@ -1,0 +1,98 @@
+{
+  "task_id": "L4_09",
+  "difficulty_level": 4,
+  "incident_description": "Database service is returning connection timeout errors for all clients since 14:32 UTC in incident L4_09.",
+  "knowledge_environment": {
+    "logs": [
+      {
+        "source": "monitor",
+        "timestamp": "00:00:00",
+        "entry": "Primary diagnostic tool has intermittent timeout behaviour"
+      },
+      {
+        "source": "db-service",
+        "timestamp": "14:31:55",
+        "entry": "Max connections reached: 500/500"
+      },
+      {
+        "source": "db-service",
+        "timestamp": "14:32:01",
+        "entry": "Connection pool exhausted"
+      },
+      {
+        "source": "api-gateway",
+        "timestamp": "14:32:07",
+        "entry": "Database timeout after 30s while serving request"
+      }
+    ],
+    "runbook": [
+      {
+        "step": 1,
+        "action": "Check connection pool metrics via tool: check_db_connections"
+      },
+      {
+        "step": 2,
+        "action": "Search for known DB saturation incidents via tool: search_knowledge_base"
+      },
+      {
+        "step": 3,
+        "action": "If pool exhausted, run tool: restart_connection_pool"
+      },
+      {
+        "step": 4,
+        "action": "Verify recovery via tool: check_service_status"
+      }
+    ],
+    "knowledge_base": [
+      {
+        "id": "KB-DB-001",
+        "pattern": "Connection pool exhaustion",
+        "symptoms": [
+          "timeout errors",
+          "max connections reached"
+        ],
+        "resolution": "Restart connection pool"
+      },
+      {
+        "id": "KB-DB-002",
+        "pattern": "Slow query storm",
+        "symptoms": [
+          "timeouts",
+          "queue growth"
+        ],
+        "resolution": "Throttle long-running queries"
+      }
+    ],
+    "service_status": {
+      "db-service": "degraded",
+      "auth-service": "healthy",
+      "api-gateway": "healthy",
+      "deploy-service": "healthy",
+      "network-core": "healthy"
+    }
+  },
+  "available_tools": [
+    "check_db_connections",
+    "check_service_status",
+    "check_auth_logs",
+    "search_knowledge_base",
+    "restart_connection_pool",
+    "check_network_status"
+  ],
+  "ground_truth": {
+    "root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "injected_failures": [
+    "repeated_tool_failure"
+  ],
+  "loop_risk": true,
+  "noise_level": "high"
+}

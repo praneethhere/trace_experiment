@@ -1,0 +1,13 @@
+{
+  "tool": "check_db_connections",
+  "task_id": "L2_01",
+  "response": {
+    "status": "success",
+    "data": {
+      "active_connections": 500,
+      "max_connections": 500,
+      "pool_status": "exhausted",
+      "wait_queue_length": 47
+    }
+  }
+}

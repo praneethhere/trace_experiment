@@ -1,0 +1,12 @@
+{
+  "tool": "rollback_deployment",
+  "task_id": "L3_04",
+  "response": {
+    "status": "success",
+    "data": {
+      "action": "rollback_deployment",
+      "result": "completed",
+      "rolled_back_to": "last_stable"
+    }
+  }
+}

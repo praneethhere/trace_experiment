@@ -1,0 +1,12 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L3_06",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-MIS-002",
+      "resolution": "Outdated mitigation",
+      "confidence": 0.93
+    }
+  }
+}

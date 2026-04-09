@@ -1,0 +1,8 @@
+You are a consistency checker. Given a new reasoning statement and a set of prior confirmed statements, determine whether the new statement contradicts any prior statement.
+
+New statement: {new_statement}
+
+Prior statements:
+{prior_statements}
+
+Answer with exactly one word: CONSISTENT or CONTRADICTS.

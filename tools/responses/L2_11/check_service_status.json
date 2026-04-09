@@ -1,0 +1,12 @@
+{
+  "tool": "check_service_status",
+  "task_id": "L2_11",
+  "response": {
+    "status": "success",
+    "data": {
+      "api-gateway": "healthy",
+      "db-connectivity": "restored",
+      "recovery_verified": true
+    }
+  }
+}

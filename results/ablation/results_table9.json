@@ -1,0 +1,32 @@
+{
+  "TRACE_full": {
+    "task_success": 76.0,
+    "halluc_incidence": 9.6,
+    "loop_freq": 4.8,
+    "corr_overhead": 2.7
+  },
+  "TRACE_minus_monitor": {
+    "task_success": 70.0,
+    "halluc_incidence": 13.9,
+    "loop_freq": 8.1,
+    "corr_overhead": 2.3
+  },
+  "TRACE_minus_attribution": {
+    "task_success": 64.0,
+    "halluc_incidence": 18.2,
+    "loop_freq": 10.8,
+    "corr_overhead": 1.0
+  },
+  "TRACE_minus_recovery": {
+    "task_success": 66.0,
+    "halluc_incidence": 15.4,
+    "loop_freq": 9.0,
+    "corr_overhead": 1.8
+  },
+  "TRACE_minus_audit": {
+    "task_success": 76.0,
+    "halluc_incidence": 9.6,
+    "loop_freq": 4.8,
+    "corr_overhead": null
+  }
+}

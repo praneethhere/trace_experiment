@@ -1,0 +1,6 @@
+Your previous step did not make progress. Reflect on what went wrong:
+- Was your reasoning unsupported by the available evidence?
+- Did you repeat an action without new information?
+- Is there a different tool you should use?
+
+Based on this reflection, describe what you will do differently next.

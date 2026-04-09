@@ -1,0 +1,11 @@
+{
+  "tool": "check_network_status",
+  "task_id": "L2_06",
+  "response": {
+    "status": "success",
+    "data": {
+      "packet_loss": 0.1,
+      "route_health": "healthy"
+    }
+  }
+}

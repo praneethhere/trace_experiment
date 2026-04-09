@@ -1,0 +1,30 @@
+{
+  "k3": {
+    "task_success": 73.0,
+    "halluc_incidence": 10.9,
+    "loop_freq": 5.9,
+    "recovery_success": 64.7,
+    "corr_overhead": 2.2
+  },
+  "k5": {
+    "task_success": 76.0,
+    "halluc_incidence": 9.6,
+    "loop_freq": 4.8,
+    "recovery_success": 68.0,
+    "corr_overhead": 2.7
+  },
+  "k7": {
+    "task_success": 75.0,
+    "halluc_incidence": 9.1,
+    "loop_freq": 4.4,
+    "recovery_success": 70.6,
+    "corr_overhead": 3.3
+  },
+  "k10": {
+    "task_success": 73.0,
+    "halluc_incidence": 9.8,
+    "loop_freq": 4.9,
+    "recovery_success": 67.9,
+    "corr_overhead": 4.1
+  }
+}

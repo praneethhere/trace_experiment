@@ -1,0 +1,57 @@
+{
+  "task_id": "L4_10",
+  "system": "TRACE",
+  "start_time": "2026-04-07T00:00:00Z",
+  "steps": [
+    {
+      "step": 0,
+      "reasoning": "The issue is being investigated through check_auth_logs based on the observed incident evidence.",
+      "tool_id": "check_auth_logs",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "error_rate": "high",
+          "certificate_status": "expired",
+          "issuer": "auth-prod"
+        }
+      }
+    },
+    {
+      "step": 1,
+      "reasoning": "[TOOL_SWITCH] Adjust next step using current evidence.",
+      "tool_id": "tool_switch",
+      "tool_status": "success",
+      "observation": {}
+    },
+    {
+      "step": 2,
+      "reasoning": "The issue is being investigated through check_auth_logs based on the observed incident evidence.",
+      "tool_id": "check_auth_logs",
+      "tool_status": "success",
+      "observation": {
+        "status": "success",
+        "data": {
+          "error_rate": "high",
+          "certificate_status": "expired",
+          "issuer": "auth-prod"
+        }
+      }
+    }
+  ],
+  "failure_events": [
+    {
+      "step": 2,
+      "state": "s_HE"
+    }
+  ],
+  "recovery_events": [
+    {
+      "step": 2,
+      "policy": "halt",
+      "outcome": "escalated"
+    }
+  ],
+  "terminal_state": "s_HE",
+  "goal_satisfied": false
+}

@@ -1,0 +1,552 @@
+{
+  "L1_01": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_02": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_03": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_04": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_05": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_06": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_07": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_08": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_09": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L1_10": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_01": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_02": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_03": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_04": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_05": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_06": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_07": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_08": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_09": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_10": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_11": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_12": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_13": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_14": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L2_15": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_01": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_02": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_03": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_04": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_05": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_06": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_07": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_08": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_09": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_10": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_11": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_12": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_13": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_14": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L3_15": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_01": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_02": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_03": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_04": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_05": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_06": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_07": {
+    "correct_root_cause": "East-west routing partition affecting api-gateway to db-service path",
+    "correct_tool_sequence": [
+      "check_network_status",
+      "search_knowledge_base",
+      "reset_network_route",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_08": {
+    "correct_root_cause": "Failed deployment introduced unhealthy api-gateway build",
+    "correct_tool_sequence": [
+      "check_pipeline_status",
+      "search_knowledge_base",
+      "rollback_deployment",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_09": {
+    "correct_root_cause": "Connection pool exhaustion on db-service",
+    "correct_tool_sequence": [
+      "check_db_connections",
+      "search_knowledge_base",
+      "restart_connection_pool",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "L4_10": {
+    "correct_root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  }
+}

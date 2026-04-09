@@ -1,0 +1,13 @@
+{
+  "tool": "search_knowledge_base",
+  "task_id": "L3_13",
+  "response": {
+    "status": "success",
+    "data": {
+      "top_match": "KB-MIS-001",
+      "resolution": "Restart api cache layer",
+      "confidence": 0.88,
+      "note": "conflicts with direct evidence"
+    }
+  }
+}

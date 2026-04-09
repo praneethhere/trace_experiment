@@ -1,0 +1,14 @@
+{
+  "hallucination_label": {
+    "kappa": 0.8,
+    "percent_agreement": 90.4
+  },
+  "contradiction_label": {
+    "kappa": 0.74,
+    "percent_agreement": 87.6
+  },
+  "safe_escalation_correctness": {
+    "kappa": 0.78,
+    "percent_agreement": 89.8
+  }
+}

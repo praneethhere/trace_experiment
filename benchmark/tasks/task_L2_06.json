@@ -1,0 +1,87 @@
+{
+  "task_id": "L2_06",
+  "difficulty_level": 2,
+  "incident_description": "Authentication requests started failing for multiple services at 09:12 UTC in incident L2_06.",
+  "knowledge_environment": {
+    "logs": [
+      {
+        "source": "auth-service",
+        "timestamp": "09:12:10",
+        "entry": "JWT validation failures increased above threshold"
+      },
+      {
+        "source": "auth-service",
+        "timestamp": "09:12:18",
+        "entry": "Signing certificate expired for issuer auth-prod"
+      }
+    ],
+    "runbook": [
+      {
+        "step": 1,
+        "action": "Inspect auth logs via tool: check_auth_logs"
+      },
+      {
+        "step": 2,
+        "action": "Search known auth incidents via tool: search_knowledge_base"
+      },
+      {
+        "step": 3,
+        "action": "If signing failure confirmed, run tool: restart_auth_service"
+      },
+      {
+        "step": 4,
+        "action": "Confirm token validation recovery via tool: check_service_status"
+      }
+    ],
+    "knowledge_base": [
+      {
+        "id": "KB-AUTH-001",
+        "pattern": "Expired signing certificate",
+        "symptoms": [
+          "401 spike",
+          "JWT validation failures"
+        ],
+        "resolution": "Refresh signing material and restart auth service"
+      },
+      {
+        "id": "KB-AUTH-002",
+        "pattern": "Clock skew",
+        "symptoms": [
+          "token not yet valid"
+        ],
+        "resolution": "Check NTP synchronization"
+      }
+    ],
+    "service_status": {
+      "db-service": "healthy",
+      "auth-service": "degraded",
+      "api-gateway": "degraded",
+      "deploy-service": "healthy",
+      "network-core": "healthy"
+    }
+  },
+  "available_tools": [
+    "check_auth_logs",
+    "check_service_status",
+    "search_knowledge_base",
+    "restart_auth_service",
+    "check_db_connections",
+    "check_network_status"
+  ],
+  "ground_truth": {
+    "root_cause": "Expired signing certificate on auth-service",
+    "correct_tool_sequence": [
+      "check_auth_logs",
+      "search_knowledge_base",
+      "restart_auth_service",
+      "check_service_status"
+    ],
+    "correct_outcome": "resolution",
+    "escalation_required": false
+  },
+  "injected_failures": [
+    "incomplete_logs"
+  ],
+  "loop_risk": false,
+  "noise_level": "low"
+}

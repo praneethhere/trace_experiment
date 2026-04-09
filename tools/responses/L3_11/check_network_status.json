@@ -1,0 +1,12 @@
+{
+  "tool": "check_network_status",
+  "task_id": "L3_11",
+  "response": {
+    "status": "success",
+    "data": {
+      "packet_loss": 87.0,
+      "route_flap": "gw-east-2",
+      "path_state": "partitioned"
+    }
+  }
+}
