@@ -26,14 +26,27 @@ class TrajectoryMonitor:
         return self.retry_counts.get(tool_name, 0)
 
     def compute_H(self, current_reasoning):
-        if not self.window:
-            return 0.0
+        """
+        Compute novelty of the current reasoning against up to K_WINDOW
+        PRIOR reasoning events.
+
+        TRACE records the current event before this method is called, so the
+        final event in full_log is the current event and must not participate
+        in its own novelty comparison.
+        """
         current_ngrams = self._ngrams(current_reasoning)
         if not current_ngrams:
             return 0.0
+
+        # full_log already contains the current event. Exclude it, then retain
+        # at most K_WINDOW prior events so H_t compares r_t with
+        # {r_(t-k), ..., r_(t-1)} rather than with itself.
+        prior_events = self.full_log[-(K_WINDOW + 1):-1]
+
         prior_ngrams = set()
-        for event in self.window:
+        for event in prior_events:
             prior_ngrams |= self._ngrams(event.get("reasoning", ""))
+
         overlap = len(current_ngrams & prior_ngrams)
         return 1.0 - overlap / len(current_ngrams)
 
