@@ -33,6 +33,30 @@ _IMPLEMENTED_TREATMENTS = {
 }
 
 
+class V2RunExecutionError(RuntimeError):
+    """
+    Raised only after a started TRACE v2 execution fails and its partial
+    scientific evidence has been persisted successfully.
+    """
+
+    def __init__(
+        self,
+        *,
+        run_id,
+        artifact_path,
+    ):
+        self.run_id = run_id
+        self.artifact_path = Path(
+            artifact_path
+        )
+
+        super().__init__(
+            "TRACE v2 execution failed after "
+            "partial evidence was persisted for "
+            f"run {run_id!r}."
+        )
+
+
 def capture_git_source(repo_root="."):
     """
     Capture the exact source revision used for execution.
@@ -301,14 +325,124 @@ def execute_trace_v2_run(
         llm_gateway=llm_gateway,
     )
 
-    (
-        final_response,
-        trajectory,
-        trace_record,
-    ) = agent.run()
+    def persist_execution(
+        execution,
+    ):
+        """
+        Build and immutably persist either a completed execution or the
+        partial evidence from a started execution that raised.
+        """
+
+        artifact = build_run_artifact(
+            run_id=run_id,
+            task=task,
+            treatment=treatment,
+            seed=seed,
+            source=source,
+
+            config_snapshot=(
+                capture_config_snapshot()
+            ),
+
+            prompts=prompt_snapshot,
+
+            llm_calls=(
+                llm_gateway
+                .get_call_records()
+            ),
+
+            llm_usage_totals=(
+                llm_gateway
+                .get_usage_totals()
+            ),
+
+            tool_calls=(
+                tool_layer
+                .get_call_records()
+            ),
+
+            execution=execution,
+        )
+
+        return write_run_artifact(
+            artifact,
+            root_dir=root_dir,
+        )
+
+
+    try:
+        (
+            final_response,
+            trajectory,
+            trace_record,
+        ) = agent.run()
+
+    except Exception as exc:
+        # The run has already crossed the execution boundary. Preserve all
+        # evidence accumulated up to the exception instead of allowing the
+        # failed attempt to disappear from the experimental record.
+        trace_record = (
+            agent.audit.get_trace()
+        )
+
+        execution = {
+            "status": "error",
+
+            "error": {
+                "phase": "agent_run",
+                "type": type(exc).__name__,
+                "message": str(exc),
+            },
+
+            "trajectory":
+                agent.trajectory,
+
+            "failure_events":
+                trace_record.get(
+                    "failure_events",
+                    [],
+                ),
+
+            "recovery_events":
+                trace_record.get(
+                    "recovery_events",
+                    [],
+                ),
+
+            # Infrastructure/provider failure is not an agent terminal state.
+            "terminal_state":
+                trace_record.get(
+                    "terminal_state"
+                ),
+
+            "goal_satisfied":
+                trace_record.get(
+                    "goal_satisfied",
+                    False,
+                ),
+
+            "final_response":
+                None,
+        }
+
+        artifact_path = (
+            persist_execution(
+                execution
+            )
+        )
+
+        raise V2RunExecutionError(
+            run_id=run_id,
+            artifact_path=artifact_path,
+        ) from exc
+
 
     execution = {
-        "trajectory": trajectory,
+        "status": "completed",
+        "error": None,
+
+        "trajectory":
+            trajectory,
 
         "failure_events":
             trace_record.get(
@@ -337,38 +471,6 @@ def execute_trace_v2_run(
             final_response,
     }
 
-    artifact = build_run_artifact(
-        run_id=run_id,
-        task=task,
-        treatment=treatment,
-        seed=seed,
-        source=source,
-
-        config_snapshot=(
-            capture_config_snapshot()
-        ),
-
-        prompts=prompt_snapshot,
-
-        llm_calls=(
-            llm_gateway
-            .get_call_records()
-        ),
-
-        llm_usage_totals=(
-            llm_gateway
-            .get_usage_totals()
-        ),
-
-        tool_calls=(
-            tool_layer
-            .get_call_records()
-        ),
-
-        execution=execution,
-    )
-
-    return write_run_artifact(
-        artifact,
-        root_dir=root_dir,
+    return persist_execution(
+        execution
     )
