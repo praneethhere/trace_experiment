@@ -140,7 +140,10 @@ class RecoveryController:
             ),
         })
 
-        plan = agent.get_llm_response(messages)
+        plan = agent.get_llm_response(
+            messages,
+            purpose="recovery_replan",
+        )
 
         self._append_event(
             agent,
@@ -178,7 +181,10 @@ class RecoveryController:
             ),
         })
 
-        selection_response = agent.get_llm_response(messages)
+        selection_response = agent.get_llm_response(
+            messages,
+            purpose="recovery_switch",
+        )
 
         selected_tool = self._parse_selected_tool(
             selection_response,
@@ -222,7 +228,10 @@ class RecoveryController:
             ),
         })
 
-        summary = agent.get_llm_response(messages)
+        summary = agent.get_llm_response(
+            messages,
+            purpose="recovery_compact",
+        )
 
         # Keep four most recent concrete events plus one semantic summary of
         # the older prefix. This bounds active context while preserving recent

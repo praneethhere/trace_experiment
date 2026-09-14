@@ -1,12 +1,20 @@
 from agents.base_react import BaseReActAgent
-from openai import OpenAI
-from config import MODEL, AGENT_TEMPERATURE
-
-client = OpenAI()
 
 class SelfReflectionAgent(BaseReActAgent):
-    def __init__(self, task, tool_layer, system_prompt, reflection_prompt):
-        super().__init__(task, tool_layer, system_prompt)
+    def __init__(
+        self,
+        task,
+        tool_layer,
+        system_prompt,
+        reflection_prompt,
+        llm_gateway=None,
+    ):
+        super().__init__(
+            task,
+            tool_layer,
+            system_prompt,
+            llm_gateway=llm_gateway,
+        )
         self.reflection_prompt = reflection_prompt
 
     def step_once(self):
@@ -23,9 +31,10 @@ class SelfReflectionAgent(BaseReActAgent):
         # Reflection is internal — no tool use, just appended to context
         messages = self.build_context()
         messages.append({"role": "user", "content": self.reflection_prompt})
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=AGENT_TEMPERATURE, messages=messages)
-        reflection_text = resp.choices[0].message.content
+        reflection_text = self.get_llm_response(
+            messages,
+            purpose="self_reflection",
+        )
         # Add reflection as a special trajectory entry (no tool call, no observation)
         self.trajectory.append({
             "step": self.step,

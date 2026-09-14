@@ -7,10 +7,20 @@ from config import THETA_H
 
 class TRACEAgent(BaseReActAgent):
     def __init__(self, task, tool_layer, system_prompt,
-                 grounding_prompt, contradiction_prompt, results_dir):
-        super().__init__(task, tool_layer, system_prompt)
+                 grounding_prompt, contradiction_prompt, results_dir,
+                 llm_gateway=None):
+        super().__init__(
+            task,
+            tool_layer,
+            system_prompt,
+            llm_gateway=llm_gateway,
+        )
         self.monitor   = TrajectoryMonitor()
-        self.attributor = FailureAttributionModule(grounding_prompt, contradiction_prompt)
+        self.attributor = FailureAttributionModule(
+            grounding_prompt,
+            contradiction_prompt,
+            llm_gateway=self.llm_gateway,
+        )
         self.recovery   = RecoveryController()
         self.audit      = AuditLayer(task["task_id"], "TRACE")
         self.results_dir = results_dir

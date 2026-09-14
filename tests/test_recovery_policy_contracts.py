@@ -60,8 +60,17 @@ class FakeAgent:
 
         self.step = len(self.trajectory)
 
-    def get_llm_response(self, messages):
-        self.llm_calls.append(messages)
+    def get_llm_response(
+        self,
+        messages,
+        purpose="agent",
+        temperature=None,
+    ):
+        self.llm_calls.append({
+            "messages": messages,
+            "purpose": purpose,
+            "temperature": temperature,
+        })
         return self.llm_response
 
 

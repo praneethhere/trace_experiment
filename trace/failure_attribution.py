@@ -1,10 +1,9 @@
-from openai import OpenAI
 from config import (MODEL, DETECTOR_TEMPERATURE,
                     THETA_GROUND, THETA_LOOP, N_LOOP, RHO_THRESHOLD, THETA_H)
 import re
 from collections import deque
 
-client = OpenAI()
+from trace.llm_gateway import MeteredLLMGateway
 
 CLAIM_MARKERS = [
     "the root cause is", "the failure is caused by", "this indicates",
@@ -12,9 +11,19 @@ CLAIM_MARKERS = [
 ]
 
 class FailureAttributionModule:
-    def __init__(self, grounding_prompt, contradiction_prompt):
+    def __init__(
+        self,
+        grounding_prompt,
+        contradiction_prompt,
+        llm_gateway=None,
+    ):
         self.grounding_prompt = grounding_prompt
         self.contradiction_prompt = contradiction_prompt
+        self.llm_gateway = (
+            llm_gateway
+            if llm_gateway is not None
+            else MeteredLLMGateway(model=MODEL)
+        )
         self.fingerprint_history = deque(maxlen=10)
         self.detector_calls = 0   # counts LLM calls for overhead tracking
 
@@ -43,10 +52,12 @@ class FailureAttributionModule:
     def _llm_grounding_check(self, claim, evidence):
         self.detector_calls += 1
         prompt = self.grounding_prompt.format(claim=claim, evidence=evidence)
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=DETECTOR_TEMPERATURE,
-            messages=[{"role": "user", "content": prompt}])
-        return "SUPPORTED" in resp.choices[0].message.content.upper()
+        response_text = self.llm_gateway.complete(
+            messages=[{"role": "user", "content": prompt}],
+            purpose="detector_f1",
+            temperature=DETECTOR_TEMPERATURE,
+        )
+        return "SUPPORTED" in response_text.upper()
 
     def _token_overlap(self, text1, text2):
         t1 = set(re.findall(r'\w+', text1.lower()))
@@ -63,10 +74,12 @@ class FailureAttributionModule:
         self.detector_calls += 1
         prompt = self.contradiction_prompt.format(
             new_statement=reasoning, prior_statements=prior_text)
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=DETECTOR_TEMPERATURE,
-            messages=[{"role": "user", "content": prompt}])
-        contradicts = "CONTRADICTS" in resp.choices[0].message.content.upper()
+        response_text = self.llm_gateway.complete(
+            messages=[{"role": "user", "content": prompt}],
+            purpose="detector_f2",
+            temperature=DETECTOR_TEMPERATURE,
+        )
+        contradicts = "CONTRADICTS" in response_text.upper()
         return contradicts, 1.0 if contradicts else 0.0
 
     # ── F3: Loop Detector ─────────────────────────────────────────────────────

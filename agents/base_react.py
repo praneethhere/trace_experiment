@@ -1,14 +1,18 @@
-from openai import OpenAI
 from config import MODEL, AGENT_TEMPERATURE, MAX_STEPS
 import json
 
-client = OpenAI()
+from trace.llm_gateway import MeteredLLMGateway
 
 class BaseReActAgent:
-    def __init__(self, task, tool_layer, system_prompt):
+    def __init__(self, task, tool_layer, system_prompt, llm_gateway=None):
         self.task = task
         self.tool_layer = tool_layer
         self.system_prompt = system_prompt
+        self.llm_gateway = (
+            llm_gateway
+            if llm_gateway is not None
+            else MeteredLLMGateway(model=MODEL)
+        )
         self.trajectory = []   # list of {step, reasoning, action, tool, observation}
         self.step = 0
 
@@ -20,10 +24,14 @@ class BaseReActAgent:
             messages.append({"role": "user", "content": f"Observation: {json.dumps(t['observation'])}"})
         return messages
 
-    def get_llm_response(self, messages):
-        resp = client.chat.completions.create(
-            model=MODEL, temperature=AGENT_TEMPERATURE, messages=messages)
-        return resp.choices[0].message.content
+    def get_llm_response(self, messages, purpose="agent", temperature=None):
+        if temperature is None:
+            temperature = AGENT_TEMPERATURE
+        return self.llm_gateway.complete(
+            messages=messages,
+            purpose=purpose,
+            temperature=temperature,
+        )
 
     def parse_action(self, response):
         # Extract tool name and check for terminal outputs
@@ -38,7 +46,10 @@ class BaseReActAgent:
 
     def step_once(self):
         messages = self.build_context()
-        response = self.get_llm_response(messages)
+        response = self.get_llm_response(
+            messages,
+            purpose="agent",
+        )
         tool_name, reasoning = self.parse_action(response)
         if tool_name is None:
             return response, True   # terminal
