@@ -17,7 +17,6 @@ class TRACEAgent(BaseReActAgent):
         self.current_state = "s_NP"
         self.lc_consecutive = 0
         self.last_verified_step = None
-        self.recovery_attempts_this_event = 0
 
     def step_once(self):
         response, terminal = super().step_once()
@@ -85,7 +84,10 @@ class TRACEAgent(BaseReActAgent):
                     self.last_verified_step), True
         else:
             self.last_verified_step = last["step"]
-            self.recovery_attempts_this_event = 0
+            # A healthy execution step closes the active failure event.
+            # A later independent failure receives a fresh recovery budget
+            # and a fresh policy-selection history.
+            self.recovery.reset_event()
 
         return response, False
 

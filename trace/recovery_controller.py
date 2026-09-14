@@ -12,17 +12,17 @@ POLICY_PRIORITY = {
 
 class RecoveryController:
     def __init__(self):
+        # Full history remains append-only for audit/replay.
         self.recovery_log = []
-        # NOTE: this remains global for now so Audit 2 changes only execution
-        # semantics. Per-failure-event budgeting is handled in the next audit.
-        self.attempt_count = 0
+
+        # Recovery budget and tried-policy state are scoped only to the
+        # currently active failure event.
+        self.event_attempt_count = 0
+        self.event_policies = []
 
     def select_policy(self, failure_state):
         policies = POLICY_PRIORITY.get(failure_state, ["halt"])
-
-        # Existing v1 behavior retained for this audit. Audit 3 will scope
-        # attempted policies explicitly to a failure event.
-        tried = [r["policy"] for r in self.recovery_log[-3:]]
+        tried = set(self.event_policies)
 
         for policy in policies:
             if policy not in tried:
@@ -260,7 +260,8 @@ class RecoveryController:
         return "attempted"
 
     def execute(self, policy, agent, failure_state, last_verified_step):
-        self.attempt_count += 1
+        self.event_attempt_count += 1
+        self.event_policies.append(policy)
         outcome = "failed"
 
         if policy == "retrieve":
@@ -293,7 +294,18 @@ class RecoveryController:
         return outcome
 
     def should_escalate(self):
-        return self.attempt_count >= N_MAX
+        return self.event_attempt_count >= N_MAX
+
+    def reset_event(self):
+        """
+        Close the active failure event while preserving append-only
+        recovery history.
+
+        A later independent failure starts with a fresh attempt budget
+        and fresh policy-selection state.
+        """
+        self.event_attempt_count = 0
+        self.event_policies = []
 
     def get_log(self):
         return self.recovery_log
