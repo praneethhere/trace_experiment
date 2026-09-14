@@ -8,7 +8,7 @@ from config import THETA_H
 class TRACEAgent(BaseReActAgent):
     def __init__(self, task, tool_layer, system_prompt,
                  grounding_prompt, contradiction_prompt, results_dir,
-                 llm_gateway=None):
+                 persist_legacy_trace=True, llm_gateway=None):
         super().__init__(
             task,
             tool_layer,
@@ -23,7 +23,15 @@ class TRACEAgent(BaseReActAgent):
         )
         self.recovery   = RecoveryController()
         self.audit      = AuditLayer(task["task_id"], "TRACE")
+
+        if persist_legacy_trace and not results_dir:
+            raise ValueError(
+                "results_dir is required when "
+                "persist_legacy_trace=True"
+            )
+
         self.results_dir = results_dir
+        self.persist_legacy_trace = persist_legacy_trace
         self.current_state = "s_NP"
         self.lc_consecutive = 0
         self.last_verified_step = None
@@ -111,5 +119,8 @@ class TRACEAgent(BaseReActAgent):
             gt_cause = self.task.get("ground_truth", {}).get("root_cause", "").lower()
             goal = gt_cause in stated_cause
         self.audit.log_terminal("s_OK" if goal else "s_HE", goal)
-        self.audit.save(self.results_dir)
+
+        if self.persist_legacy_trace:
+            self.audit.save(self.results_dir)
+
         return final_response, trajectory, self.audit.get_trace()
