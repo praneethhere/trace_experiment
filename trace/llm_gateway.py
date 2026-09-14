@@ -4,7 +4,11 @@ import json
 import time
 from datetime import datetime, timezone
 
-from config import MODEL
+from config import (
+    MODEL,
+    OPENAI_MAX_RETRIES,
+    OPENAI_TIMEOUT_SECONDS,
+)
 
 
 def _sha256_json(value):
@@ -49,7 +53,10 @@ class MeteredLLMGateway:
         if client is None:
             from openai import OpenAI
 
-            client = OpenAI()
+            client = OpenAI(
+                max_retries=OPENAI_MAX_RETRIES,
+                timeout=OPENAI_TIMEOUT_SECONDS,
+            )
 
         self.client = client
         self.model = model
@@ -107,15 +114,38 @@ class MeteredLLMGateway:
             record = {
                 **base_record,
                 "status": "success",
-                "provider_request_id": getattr(
+                "provider_completion_id": getattr(
                     response,
                     "id",
+                    None,
+                ),
+                "provider_request_id": getattr(
+                    response,
+                    "_request_id",
                     None,
                 ),
                 "provider_model": getattr(
                     response,
                     "model",
                     None,
+                ),
+                "system_fingerprint": getattr(
+                    response,
+                    "system_fingerprint",
+                    None,
+                ),
+                "finish_reason": (
+                    getattr(
+                        response.choices[0],
+                        "finish_reason",
+                        None,
+                    )
+                    if getattr(
+                        response,
+                        "choices",
+                        None,
+                    )
+                    else None
                 ),
                 "response_text": response_text,
                 "response_sha256": _sha256_text(
@@ -150,8 +180,15 @@ class MeteredLLMGateway:
             self._call_records.append({
                 **base_record,
                 "status": "error",
-                "provider_request_id": None,
+                "provider_completion_id": None,
+                "provider_request_id": getattr(
+                    exc,
+                    "request_id",
+                    None,
+                ),
                 "provider_model": None,
+                "system_fingerprint": None,
+                "finish_reason": None,
                 "response_text": None,
                 "response_sha256": None,
                 "usage": {
