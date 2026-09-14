@@ -1,18 +1,4 @@
-import sys
-import types
 import unittest
-
-
-# recovery_controller.py creates an OpenAI client at import time even though
-# none of the recovery-policy methods under test use that client. Stub the
-# dependency so these contract tests remain fully offline and cannot make
-# network/API calls.
-class _OfflineOpenAI:
-    def __init__(self, *args, **kwargs):
-        pass
-
-
-sys.modules["openai"] = types.SimpleNamespace(OpenAI=_OfflineOpenAI)
 
 from trace.recovery_controller import RecoveryController
 
@@ -21,19 +7,42 @@ class RecordingToolLayer:
     def __init__(self):
         self.calls = []
 
-    def call(self, tool_name):
-        self.calls.append(tool_name)
+    def call(self, tool_name, args=None):
+        self.calls.append({
+            "tool_name": tool_name,
+            "args": args,
+        })
         return {
             "status": "success",
             "source": tool_name,
+            "args": args,
             "evidence": "recovery evidence",
         }
 
 
 class FakeAgent:
-    def __init__(self, trajectory=None):
+    def __init__(
+        self,
+        trajectory=None,
+        llm_response="Revised recovery plan",
+    ):
+        # Match BaseReActAgent's task contract.
+        self.task = {
+            "task_id": "offline_contract_test",
+            "incident_description": (
+                "Authentication incident under investigation."
+            ),
+            "available_tools": [
+                "search_logs",
+                "search_knowledge_base",
+                "identity_check",
+            ],
+        }
+
         self.tool_layer = RecordingToolLayer()
         self.llm_calls = []
+        self.llm_response = llm_response
+
         self.trajectory = trajectory or [
             {
                 "step": 0,
@@ -48,132 +57,217 @@ class FakeAgent:
                 "observation": {"status": "fail"},
             },
         ]
+
         self.step = len(self.trajectory)
 
     def get_llm_response(self, messages):
         self.llm_calls.append(messages)
-        return "Revised recovery plan"
+        return self.llm_response
 
 
 class TestRecoveryPolicyContracts(unittest.TestCase):
 
     def test_retrieve_queries_the_knowledge_environment(self):
-        """
-        pi_retrieve must perform an actual retrieval operation rather than
-        merely append a recovery label to the trajectory.
-        """
         agent = FakeAgent()
         controller = RecoveryController()
 
-        controller.execute(
+        outcome = controller.execute(
             "retrieve",
             agent,
             failure_state="s_UR",
             last_verified_step=0,
         )
 
+        self.assertEqual(outcome, "attempted")
         self.assertGreater(
             len(agent.tool_layer.calls),
             0,
             msg=(
-                "retrieve did not query the tool/knowledge environment; "
-                "a placeholder trajectory entry is not evidence retrieval."
+                "retrieve did not execute a retrieval-capable tool."
             ),
         )
 
-    def test_replan_generates_a_revised_plan(self):
+        self.assertEqual(
+            agent.tool_layer.calls[-1]["tool_name"],
+            "search_knowledge_base",
+        )
+
+    def test_retrieve_passes_a_nonempty_query_argument(self):
         """
-        pi_replan is described as prompting for a revised action plan, so
-        executing it must invoke the agent/model planning path.
+        The intervention must carry failure context into the retrieval call,
+        even though the legacy fixture layer itself is not query-sensitive.
         """
         agent = FakeAgent()
         controller = RecoveryController()
 
-        controller.execute(
+        outcome = controller.execute(
+            "retrieve",
+            agent,
+            failure_state="s_UR",
+            last_verified_step=0,
+        )
+
+        self.assertEqual(outcome, "attempted")
+
+        call = agent.tool_layer.calls[-1]
+
+        self.assertEqual(
+            call["tool_name"],
+            "search_knowledge_base",
+        )
+
+        args = call["args"]
+
+        self.assertIsInstance(args, dict)
+        self.assertTrue(
+            args.get("query", "").strip(),
+            msg="retrieve executed without a meaningful query argument.",
+        )
+
+    def test_replan_generates_a_revised_plan(self):
+        agent = FakeAgent()
+        controller = RecoveryController()
+
+        outcome = controller.execute(
             "replan",
             agent,
             failure_state="s_CD",
             last_verified_step=0,
         )
 
+        self.assertEqual(outcome, "attempted")
+
         self.assertGreater(
             len(agent.llm_calls),
             0,
             msg=(
-                "replan did not invoke the model/planning path; "
-                "it only recorded a recovery marker."
+                "replan did not invoke the agent/model planning path."
             ),
         )
 
     def test_switch_executes_an_alternative_tool(self):
         """
-        pi_switch must replace the failing tool with an actual alternative,
-        not record the synthetic action name 'tool_switch'.
+        A valid selector response must cause execution of a different,
+        task-declared tool.
         """
-        agent = FakeAgent()
+        agent = FakeAgent(
+            llm_response="Action: identity_check"
+        )
+
         failing_tool = agent.trajectory[-1]["action"]
         controller = RecoveryController()
 
-        controller.execute(
+        outcome = controller.execute(
             "switch",
             agent,
             failure_state="s_TA",
             last_verified_step=0,
         )
 
-        self.assertGreater(
-            len(agent.tool_layer.calls),
-            0,
-            msg="switch did not invoke any alternative tool.",
-        )
+        self.assertEqual(outcome, "attempted")
+        self.assertGreater(len(agent.tool_layer.calls), 0)
+
+        selected = agent.tool_layer.calls[-1]["tool_name"]
 
         self.assertNotEqual(
-            agent.tool_layer.calls[-1],
+            selected,
             failing_tool,
-            msg="switch retried the same failing tool instead of replacing it.",
+            msg=(
+                "switch retried the same failing tool instead "
+                "of replacing it."
+            ),
         )
 
+        self.assertIn(
+            selected,
+            agent.task["available_tools"],
+        )
+
+    def test_switch_executes_exact_valid_selected_tool(self):
+        agent = FakeAgent(
+            llm_response="Action: identity_check"
+        )
+        controller = RecoveryController()
+
+        outcome = controller.execute(
+            "switch",
+            agent,
+            failure_state="s_TA",
+            last_verified_step=0,
+        )
+
+        self.assertEqual(outcome, "attempted")
+
+        self.assertEqual(
+            agent.tool_layer.calls[-1]["tool_name"],
+            "identity_check",
+        )
+
+    def test_switch_invalid_selection_fails_closed(self):
+        """
+        Invalid selector output must not silently receive a deterministic
+        fallback that looks like successful recovery.
+        """
+        agent = FakeAgent(
+            llm_response="Revised recovery plan"
+        )
+        controller = RecoveryController()
+
+        outcome = controller.execute(
+            "switch",
+            agent,
+            failure_state="s_TA",
+            last_verified_step=0,
+        )
+
+        self.assertEqual(outcome, "failed")
+        self.assertEqual(agent.tool_layer.calls, [])
+
     def test_compact_performs_semantic_compaction(self):
-        """
-        The manuscript describes pi_compact as summarizing/compressing
-        trajectory context and counts such recovery as an inference-bearing
-        operation. It therefore must invoke the model rather than only slice
-        the Python list.
-        """
         trajectory = [
             {
                 "step": i,
                 "reasoning": f"reasoning step {i}",
                 "action": f"tool_{i}",
-                "observation": {"status": "success", "value": i},
+                "observation": {
+                    "status": "success",
+                    "value": i,
+                },
             }
             for i in range(8)
         ]
 
-        agent = FakeAgent(trajectory=trajectory)
+        agent = FakeAgent(
+            trajectory=trajectory,
+            llm_response=(
+                "Verified facts and unresolved state summary."
+            ),
+        )
         controller = RecoveryController()
 
-        controller.execute(
+        outcome = controller.execute(
             "compact",
             agent,
             failure_state="s_RL",
             last_verified_step=5,
         )
 
+        self.assertEqual(outcome, "attempted")
+
         self.assertGreater(
             len(agent.llm_calls),
             0,
             msg=(
-                "compact did not summarize/compress context semantically; "
-                "it only truncated the trajectory."
+                "compact did not invoke semantic summarization."
             ),
         )
 
+        self.assertEqual(
+            agent.trajectory[0]["action"],
+            "context_compaction",
+        )
+
     def test_backtrack_restores_last_verified_step(self):
-        """
-        Existing backtracking should retain the trajectory only through the
-        last verified step and reset the next execution index accordingly.
-        """
         agent = FakeAgent()
         controller = RecoveryController()
 
