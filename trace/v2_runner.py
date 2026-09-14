@@ -1,0 +1,374 @@
+import re
+import subprocess
+from pathlib import Path
+
+from agents.trace_agent import TRACEAgent
+from config import (
+    MODEL,
+    AGENT_TEMPERATURE,
+    DETECTOR_TEMPERATURE,
+    MAX_STEPS,
+    N_MAX,
+    K_WINDOW,
+    THETA_H,
+    THETA_GROUND,
+    THETA_LOOP,
+    N_LOOP,
+    RHO_THRESHOLD,
+)
+from tools.tool_layer import ToolLayer
+from trace.llm_gateway import MeteredLLMGateway
+from trace.run_artifacts import (
+    build_run_artifact,
+    write_run_artifact,
+)
+
+
+_RUN_ID_PATTERN = re.compile(
+    r"^[A-Za-z0-9._-]+$"
+)
+
+_IMPLEMENTED_TREATMENTS = {
+    "predicted_attribution",
+}
+
+
+def capture_git_source(repo_root="."):
+    """
+    Capture the exact source revision used for execution.
+
+    Generated scientific evidence must never silently claim that modified
+    source corresponds to the committed revision.
+    """
+
+    root = Path(repo_root)
+
+    try:
+        commit = subprocess.run(
+            [
+                "git",
+                "rev-parse",
+                "HEAD",
+            ],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+
+        status = subprocess.run(
+            [
+                "git",
+                "status",
+                "--porcelain",
+            ],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout
+
+    except (
+        OSError,
+        subprocess.CalledProcessError,
+    ) as exc:
+        raise RuntimeError(
+            "Unable to capture Git source provenance."
+        ) from exc
+
+    if not re.fullmatch(
+        r"[0-9a-fA-F]{40}",
+        commit,
+    ):
+        raise RuntimeError(
+            "Git source probe returned an invalid commit id."
+        )
+
+    return {
+        "git_commit": commit,
+        "git_dirty": bool(status.strip()),
+    }
+
+
+def capture_config_snapshot():
+    """
+    Capture scientific configuration only.
+
+    Credentials and environment secrets are intentionally excluded.
+    """
+
+    return {
+        "model": MODEL,
+        "agent_temperature":
+            AGENT_TEMPERATURE,
+        "detector_temperature":
+            DETECTOR_TEMPERATURE,
+        "max_steps": MAX_STEPS,
+        "n_max": N_MAX,
+        "k_window": K_WINDOW,
+        "theta_h": THETA_H,
+        "theta_ground": THETA_GROUND,
+        "theta_loop": THETA_LOOP,
+        "n_loop": N_LOOP,
+        "rho_threshold":
+            RHO_THRESHOLD,
+    }
+
+
+def _validate_run_id(run_id):
+    if (
+        not isinstance(run_id, str)
+        or not run_id
+        or not _RUN_ID_PATTERN.fullmatch(
+            run_id
+        )
+    ):
+        raise ValueError(
+            "run_id must contain only letters, "
+            "numbers, '.', '_' or '-'."
+        )
+
+
+def _preflight_run_target(
+    root_dir,
+    run_id,
+):
+    """
+    Reserve run identity conceptually before any inference cost.
+
+    Existing run namespaces are immutable and cannot be reused.
+    """
+
+    _validate_run_id(run_id)
+
+    run_dir = (
+        Path(root_dir)
+        / "artifacts"
+        / "v2"
+        / "runs"
+        / run_id
+    )
+
+    if run_dir.exists():
+        raise FileExistsError(
+            f"Run id already exists: {run_id}"
+        )
+
+
+def _validate_treatment(treatment):
+    if treatment not in _IMPLEMENTED_TREATMENTS:
+        raise ValueError(
+            "Treatment is not implemented by "
+            f"this runner: {treatment!r}"
+        )
+
+
+def execute_trace_v2_run(
+    *,
+    run_id,
+    task,
+    treatment,
+    seed,
+    prompts,
+    root_dir=".",
+    repo_root=".",
+    llm_gateway=None,
+    source_probe=capture_git_source,
+):
+    """
+    Execute one TRACE v2 predicted-attribution run and write exactly one
+    immutable raw evidence bundle.
+
+    This function deliberately does not score the run. Raw evidence is the
+    execution boundary; deterministic scoring is a later stage.
+    """
+
+    # Everything below this preflight can carry inference or execution cost.
+    # Reject invalid identities/treatments and existing run namespaces first.
+    _validate_treatment(treatment)
+
+    _preflight_run_target(
+        root_dir,
+        run_id,
+    )
+
+    source = source_probe(
+        repo_root
+    )
+
+    if not isinstance(source, dict):
+        raise RuntimeError(
+            "Source probe did not return provenance metadata."
+        )
+
+    if not source.get("git_commit"):
+        raise RuntimeError(
+            "Source provenance is missing git_commit."
+        )
+
+    if source.get("git_dirty"):
+        raise RuntimeError(
+            "Refusing TRACE v2 execution from a dirty source tree."
+        )
+
+    required_prompts = {
+        "system_react",
+        "grounding_check",
+        "contradiction_check",
+    }
+
+    missing_prompts = (
+        required_prompts
+        - set(prompts)
+    )
+
+    if missing_prompts:
+        raise ValueError(
+            "Missing required TRACE prompts: "
+            + ", ".join(
+                sorted(missing_prompts)
+            )
+        )
+
+    system_template = prompts[
+        "system_react"
+    ]
+
+    system_rendered = (
+        system_template.replace(
+            "{tool_list}",
+            ", ".join(
+                task.get(
+                    "available_tools",
+                    []
+                )
+            ),
+        )
+    )
+
+    prompt_snapshot = {
+        "system_react_template":
+            system_template,
+        "system_react_rendered":
+            system_rendered,
+        "grounding_check":
+            prompts["grounding_check"],
+        "contradiction_check":
+            prompts[
+                "contradiction_check"
+            ],
+    }
+
+    # Default provider construction happens only after all no-cost source,
+    # identity, treatment, and prompt checks have passed.
+    if llm_gateway is None:
+        llm_gateway = (
+            MeteredLLMGateway(
+                model=MODEL
+            )
+        )
+
+    gateway_model = getattr(
+        llm_gateway,
+        "model",
+        MODEL,
+    )
+
+    if gateway_model != MODEL:
+        raise ValueError(
+            "Injected LLM gateway model does not "
+            "match the captured configuration model."
+        )
+
+    tool_layer = ToolLayer(
+        task["task_id"]
+    )
+
+    agent = TRACEAgent(
+        task=task,
+        tool_layer=tool_layer,
+        system_prompt=system_rendered,
+        grounding_prompt=(
+            prompts["grounding_check"]
+        ),
+        contradiction_prompt=(
+            prompts[
+                "contradiction_check"
+            ]
+        ),
+        results_dir=None,
+        persist_legacy_trace=False,
+        llm_gateway=llm_gateway,
+    )
+
+    (
+        final_response,
+        trajectory,
+        trace_record,
+    ) = agent.run()
+
+    execution = {
+        "trajectory": trajectory,
+
+        "failure_events":
+            trace_record.get(
+                "failure_events",
+                [],
+            ),
+
+        "recovery_events":
+            trace_record.get(
+                "recovery_events",
+                [],
+            ),
+
+        "terminal_state":
+            trace_record.get(
+                "terminal_state"
+            ),
+
+        "goal_satisfied":
+            trace_record.get(
+                "goal_satisfied",
+                False,
+            ),
+
+        "final_response":
+            final_response,
+    }
+
+    artifact = build_run_artifact(
+        run_id=run_id,
+        task=task,
+        treatment=treatment,
+        seed=seed,
+        source=source,
+
+        config_snapshot=(
+            capture_config_snapshot()
+        ),
+
+        prompts=prompt_snapshot,
+
+        llm_calls=(
+            llm_gateway
+            .get_call_records()
+        ),
+
+        llm_usage_totals=(
+            llm_gateway
+            .get_usage_totals()
+        ),
+
+        tool_calls=(
+            tool_layer
+            .get_call_records()
+        ),
+
+        execution=execution,
+    )
+
+    return write_run_artifact(
+        artifact,
+        root_dir=root_dir,
+    )
