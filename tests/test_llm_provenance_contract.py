@@ -18,6 +18,7 @@ class FakeCompletions:
 
         return SimpleNamespace(
             id=f"fake-request-{call_number}",
+                _request_id=f"fake-request-{call_number}",
             model=kwargs["model"],
             choices=[
                 SimpleNamespace(
