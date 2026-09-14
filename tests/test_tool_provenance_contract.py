@@ -112,12 +112,12 @@ class TestToolProvenanceContract(unittest.TestCase):
             )
 
             self.assertEqual(
-                Path(records[0]["fixture_path"]).resolve(),
-                default_path.resolve(),
+                records[0]["fixture_path"],
+                "task_001/check_status.json",
             )
             self.assertEqual(
-                Path(records[1]["fixture_path"]).resolve(),
-                retry_path.resolve(),
+                records[1]["fixture_path"],
+                "task_001/check_status_call2.json",
             )
 
             self.assertEqual(
@@ -145,6 +145,64 @@ class TestToolProvenanceContract(unittest.TestCase):
             self.assertEqual(
                 records[0]["args"]["service"],
                 "api",
+            )
+
+        finally:
+            temp.cleanup()
+
+    def test_fixture_paths_are_portable_and_not_machine_absolute(self):
+        """
+        Fixture provenance must be stable across developer machines.
+
+        Store a RESPONSES_DIR-relative path plus the fixture content hash,
+        never an absolute local filesystem path.
+        """
+        temp, root, _, _ = self._make_fixture_tree()
+
+        try:
+            with patch("tools.tool_layer.RESPONSES_DIR", str(root)):
+                layer = ToolLayer("task_001")
+
+                layer.call("check_status")
+                layer.call("check_status")
+
+                records = layer.get_call_records()
+
+            self.assertEqual(
+                records[0]["fixture_path"],
+                "task_001/check_status.json",
+            )
+
+            self.assertEqual(
+                records[1]["fixture_path"],
+                "task_001/check_status_call2.json",
+            )
+
+            self.assertFalse(
+                Path(
+                    records[0]["fixture_path"]
+                ).is_absolute(),
+            )
+
+            self.assertFalse(
+                Path(
+                    records[1]["fixture_path"]
+                ).is_absolute(),
+            )
+
+            self.assertNotIn(
+                str(root),
+                records[0]["fixture_path"],
+            )
+
+            self.assertNotIn(
+                str(root),
+                records[1]["fixture_path"],
+            )
+
+            self.assertEqual(
+                len(records[0]["fixture_sha256"]),
+                64,
             )
 
         finally:
