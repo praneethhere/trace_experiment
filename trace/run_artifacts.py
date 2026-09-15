@@ -5,7 +5,8 @@ import re
 from pathlib import Path
 
 
-SCHEMA_VERSION = "trace-v2-run-artifact/1"
+SCHEMA_VERSION = "trace-v2-run-artifact/2"
+_LEGACY_SCHEMA_VERSION = "trace-v2-run-artifact/1"
 
 _RUN_ID_PATTERN = re.compile(
     r"^[A-Za-z0-9._-]+$"
@@ -85,6 +86,7 @@ def build_run_artifact(
     llm_usage_totals,
     tool_calls,
     execution,
+    runtime_snapshot=None,
 ):
     """
     Build a deterministic TRACE v2 raw-run bundle from supplied evidence.
@@ -99,6 +101,10 @@ def build_run_artifact(
     task_snapshot = copy.deepcopy(task)
     config_copy = copy.deepcopy(
         config_snapshot
+    )
+
+    runtime_copy = copy.deepcopy(
+        runtime_snapshot
     )
 
     prompt_records = {}
@@ -122,7 +128,11 @@ def build_run_artifact(
         }
 
     artifact = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": (
+            SCHEMA_VERSION
+            if runtime_copy is not None
+            else _LEGACY_SCHEMA_VERSION
+        ),
 
         "run_id": run_id,
         "treatment": treatment,
@@ -165,6 +175,14 @@ def build_run_artifact(
             execution
         ),
     }
+
+    if runtime_copy is not None:
+        artifact["runtime"] = {
+            "snapshot": runtime_copy,
+            "sha256": canonical_sha256(
+                runtime_copy
+            ),
+        }
 
     artifact["artifact_sha256"] = (
         compute_artifact_sha256(

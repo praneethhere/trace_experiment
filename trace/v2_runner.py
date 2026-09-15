@@ -1,5 +1,8 @@
+import importlib.metadata
+import platform
 import re
 import subprocess
+from datetime import date
 from pathlib import Path
 
 from agents.trace_agent import TRACEAgent
@@ -15,6 +18,8 @@ from config import (
     THETA_LOOP,
     N_LOOP,
     RHO_THRESHOLD,
+    OPENAI_MAX_RETRIES,
+    OPENAI_TIMEOUT_SECONDS,
 )
 from tools.tool_layer import ToolLayer
 from trace.llm_gateway import MeteredLLMGateway
@@ -137,6 +142,111 @@ def capture_config_snapshot():
         "rho_threshold":
             RHO_THRESHOLD,
     }
+
+
+def _installed_package_version(name):
+    """
+    Return the installed distribution version without recording paths,
+    credentials, environment variables, or other machine-local secrets.
+    """
+    try:
+        return importlib.metadata.version(
+            name
+        )
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def capture_runtime_snapshot():
+    """
+    Capture the execution environment needed to interpret a TRACE v2 run.
+
+    The snapshot is deliberately narrow and secret-free: language/runtime
+    identity, platform identity, exact relevant package versions, and the
+    explicit provider transport policy.
+    """
+    package_names = (
+        "openai",
+        "httpx2",
+        "httpcore2",
+        "pydantic",
+        "pydantic-core",
+        "anyio",
+        "jiter",
+        "typing_extensions",
+    )
+
+    return {
+        "python": {
+            "version":
+                platform.python_version(),
+            "implementation":
+                platform.python_implementation(),
+        },
+
+        "platform": {
+            "system":
+                platform.system(),
+            "release":
+                platform.release(),
+            "machine":
+                platform.machine(),
+        },
+
+        "packages": {
+            name:
+                _installed_package_version(
+                    name
+                )
+            for name in package_names
+        },
+
+        "provider_transport": {
+            "max_retries":
+                OPENAI_MAX_RETRIES,
+            "timeout_seconds":
+                OPENAI_TIMEOUT_SECONDS,
+        },
+    }
+
+
+_MODEL_SNAPSHOT_PATTERN = re.compile(
+    r"^.+-(20[0-9]{2}-[0-9]{2}-[0-9]{2})$"
+)
+
+
+def validate_official_model_snapshot(model):
+    """
+    Require a structurally dated model identifier for official provider runs.
+
+    This validates pinning structure only. It does not claim that a model
+    exists or is currently available; availability is verified separately
+    before real experiments.
+    """
+    if not isinstance(model, str):
+        raise ValueError(
+            "Official model must use a dated snapshot identifier."
+        )
+
+    match = _MODEL_SNAPSHOT_PATTERN.fullmatch(
+        model
+    )
+
+    if match is None:
+        raise ValueError(
+            "Official model must use a dated snapshot identifier."
+        )
+
+    try:
+        date.fromisoformat(
+            match.group(1)
+        )
+    except ValueError as exc:
+        raise ValueError(
+            "Official model snapshot contains an invalid date."
+        ) from exc
+
+    return model
 
 
 def _validate_run_id(run_id):
@@ -286,6 +396,9 @@ def execute_trace_v2_run(
     # Default provider construction happens only after all no-cost source,
     # identity, treatment, and prompt checks have passed.
     if llm_gateway is None:
+        validate_official_model_snapshot(
+            MODEL
+        )
         llm_gateway = (
             MeteredLLMGateway(
                 model=MODEL
@@ -339,6 +452,10 @@ def execute_trace_v2_run(
             treatment=treatment,
             seed=seed,
             source=source,
+
+            runtime_snapshot=(
+                capture_runtime_snapshot()
+            ),
 
             config_snapshot=(
                 capture_config_snapshot()
