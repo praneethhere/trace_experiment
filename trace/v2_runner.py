@@ -263,6 +263,74 @@ def _validate_run_id(run_id):
         )
 
 
+def validate_artifact_root(
+    root_dir,
+    *,
+    source_root=None,
+):
+    """
+    Require TRACE v2 raw-run evidence to live outside the source checkout.
+
+    Resolving both paths before comparison also prevents a symlink outside
+    the checkout from aliasing back into the repository.
+    """
+    if root_dir is None:
+        raise ValueError(
+            "An explicit artifact root outside "
+            "the source repository is required."
+        )
+
+    try:
+        artifact_root = (
+            Path(root_dir)
+            .expanduser()
+            .resolve()
+        )
+    except (
+        TypeError,
+        ValueError,
+        OSError,
+    ) as exc:
+        raise ValueError(
+            "Artifact root must be a valid path "
+            "outside the source repository."
+        ) from exc
+
+    if source_root is None:
+        source_root = (
+            Path(__file__)
+            .resolve()
+            .parents[1]
+        )
+
+    try:
+        source_root = (
+            Path(source_root)
+            .expanduser()
+            .resolve()
+        )
+    except (
+        TypeError,
+        ValueError,
+        OSError,
+    ) as exc:
+        raise ValueError(
+            "Source root must be a valid path."
+        ) from exc
+
+    if (
+        artifact_root == source_root
+        or source_root
+        in artifact_root.parents
+    ):
+        raise ValueError(
+            "Artifact root must be outside "
+            "the source repository."
+        )
+
+    return artifact_root
+
+
 def _preflight_run_target(
     root_dir,
     run_id,
@@ -304,7 +372,7 @@ def execute_trace_v2_run(
     treatment,
     seed,
     prompts,
-    root_dir=".",
+    root_dir=None,
     repo_root=".",
     llm_gateway=None,
     source_probe=capture_git_source,
@@ -321,8 +389,12 @@ def execute_trace_v2_run(
     # Reject invalid identities/treatments and existing run namespaces first.
     _validate_treatment(treatment)
 
+    artifact_root = validate_artifact_root(
+        root_dir
+    )
+
     _preflight_run_target(
-        root_dir,
+        artifact_root,
         run_id,
     )
 
@@ -483,7 +555,7 @@ def execute_trace_v2_run(
 
         return write_run_artifact(
             artifact,
-            root_dir=root_dir,
+            root_dir=artifact_root,
         )
 
 
