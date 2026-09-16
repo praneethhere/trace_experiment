@@ -89,6 +89,27 @@ These areas are substantially occupied by prior work.
 Therefore TRACE v2 must not present generic downstream utility or
 decision-focused evaluation as a new idea.
 
+## September 2026 live-check addendum
+
+AgentDebugX (arXiv:2607.18754) further constrains the claim boundary.
+
+It already implements a closed debugging loop of:
+
+    Detect -> Attribute -> Recover -> Rerun
+
+including checkpoint replay and downstream repair evaluation.
+
+Therefore TRACE v2 will also NOT claim novelty for connecting failure
+attribution to recovery/rerun as a generic closed-loop debugging system.
+
+Current candidate distinction:
+
+    evaluate whether conventional attribution metrics select diagnoses
+    that maximize downstream recovery utility, and whether that selection
+    is stable across different recovery consumers.
+
+This remains a hypothesis, not a novelty claim.
+
 ## Candidate surviving question
 
 Does conventional failure-attribution accuracy rank attribution systems by
