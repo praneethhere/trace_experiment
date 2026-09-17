@@ -459,9 +459,18 @@ def _child_execute(
                 arguments
             )
 
-            actual_result = function(
-                **arguments
-            )
+            try:
+                actual_result = function(
+                    **arguments
+                )
+            except Exception as exc:
+                actual_result = {
+                    "__trace_v2_observation__": {
+                        "kind": "exception",
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                    }
+                }
 
             actual_hash = canonical_sha256(
                 actual_result
