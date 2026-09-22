@@ -101,6 +101,69 @@ The receiver experiment will keep diagnosis treatment bytes external to the
 SREGym diagnosis-submission mechanism unless a later gate proves use of that
 mechanism cannot contaminate the treatment comparison.
 
+
+## Post-Gate-1 upstream delta recheck — 2026-09-22
+
+The original Gate 1 source audit above remains pinned to:
+
+`c0d57d13d25231a9a6f68390afe460cbfda4d77e`
+
+That provenance is retained rather than rewritten.
+
+Before beginning the incident-recreation feasibility study, upstream SREGym
+`main` was rechecked at:
+
+`0cdc976d4ba4fa6c11a982121a32bf6e391a3742`
+
+The intervening relevant upstream change was SREGym PR #1038, which added an
+optional steady-state telemetry window after application deployment and before
+fault injection.
+
+At the rechecked revision:
+
+- `Problem.baseline_duration_s` defaults to zero;
+- `ConductorConfig.baseline_override_s` may override that value;
+- the CLI exposes the override as `--baseline`;
+- no problem-specific `baseline_duration_s` override was found;
+- the steady-state window executes before fault injection;
+- mitigation-oracle baseline capture still occurs immediately before fault
+  injection;
+- no generic post-fault full-system snapshot or branch-restore mechanism was
+  found;
+- no mechanism was found that makes independent SREGym restarts identical
+  pre-recovery branches.
+
+TRACE v2 therefore distinguishes three separate concepts:
+
+1. **steady-state telemetry window** — optional elapsed healthy runtime after
+   deployment and before fault injection;
+2. **mitigation-oracle healthy baseline** — oracle state captured immediately
+   before the fault for grading;
+3. **cluster-state baseline/reconciliation** — benchmark-isolation machinery
+   used to restore cluster configuration toward baseline.
+
+None of these establishes an exact post-fault branch checkpoint.
+
+### Delta decision
+
+**Gate 1 conclusion unchanged.**
+
+SREGym remains approved only as a candidate **live-system matched-restart
+external validation** environment.
+
+It remains unapproved as a **verified same-prefix causal environment**.
+
+PR #1038 does, however, introduce an additional pre-fault temporal treatment
+that can change telemetry history and incident state. The incident-recreation
+feasibility contract must therefore freeze the steady-state-window policy
+before executing feasibility trials.
+
+The duration must not be selected after observing recovery-agent outcomes.
+Gate 2 may evaluate incident-recreation behavior under a predeclared
+source-justified policy, but recovery outcomes and model-agent behavior remain
+prohibited until that gate is frozen and passed.
+
+
 ## Experimental role
 
 SREGym is assigned the following candidate role:
