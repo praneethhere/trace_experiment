@@ -26,7 +26,7 @@ def fixture(token: str = "a") -> dict:
         pod_uid = f"{token}-pod-{name}"
         result["deployments"].append({
             "metadata": meta(name, d_uid),
-            "spec": {"replicas": 1, "template": {"metadata": {"labels": {
+            "spec": {"replicas": 1, "selector": {"matchLabels": {"app": name}}, "template": {"metadata": {"labels": {
                 "service-route": "frontend", "app": name}}}},
             "status": {"readyReplicas": 1},
         })
@@ -198,6 +198,54 @@ class TestP1Manifestation(unittest.TestCase):
         f = fixture()
         f["pods"][1]["status"]["conditions"].append({"type": "Ready", "status": "False"})
         self.assertFalse(evaluate_p1(f).valid_manifestation)
+
+    def test_null_controller_uid_chain_fails_closed(self):
+        f = fixture()
+        dep = f["deployments"][1]
+        rs = f["replicasets"][1]
+        pod = f["pods"][1]
+
+        dep["metadata"]["uid"] = None
+        rs["metadata"]["ownerReferences"][0]["uid"] = None
+        rs["metadata"]["uid"] = None
+        pod["metadata"]["ownerReferences"][0]["uid"] = None
+
+        r = evaluate_p1(f)
+        self.assertFalse(r.valid_manifestation)
+        self.assertTrue(r.errors)
+
+    def test_empty_controller_uid_fails_closed(self):
+        f = fixture()
+        f["pods"][1]["metadata"]["ownerReferences"][0]["uid"] = ""
+        self.assertFalse(evaluate_p1(f).valid_manifestation)
+
+    def test_missing_deployment_selector_fails_closed(self):
+        f = fixture()
+        f["deployments"][0]["spec"].pop("selector")
+        self.assertFalse(evaluate_p1(f).valid_manifestation)
+
+    def test_selector_template_mismatch_fails_closed(self):
+        f = fixture()
+        f["deployments"][1]["spec"]["selector"]["matchLabels"]["app"] = "wrong"
+        self.assertFalse(evaluate_p1(f).valid_manifestation)
+
+    def test_readiness_discrepancy_remains_visible(self):
+        f = fixture()
+        modified = copy.deepcopy(f)
+        modified["deployments"][0]["status"]["readyReplicas"] = 999
+
+        control = evaluate_p1(f)
+        changed = evaluate_p1(modified)
+
+        self.assertTrue(control.valid_manifestation)
+        self.assertEqual(
+            changed.semantic["deployment_replicas"]["frontend"]["ready"],
+            999,
+        )
+        self.assertNotEqual(
+            control.semantic_sha256,
+            changed.semantic_sha256,
+        )
 
     def test_missing_pod_uid_breaks_owner_attribution(self):
         f = fixture()

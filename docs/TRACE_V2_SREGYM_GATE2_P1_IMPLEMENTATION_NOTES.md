@@ -37,3 +37,26 @@ python3 -m unittest discover -s tests -p 'test_gate2_p1_fingerprint.py' -v
 5. Add pinned-source/submodule, propagation and forbidden agent/model call guards, plus final pre-execution upstream recheck.
 
 No incident recreation is authorized by this patch.
+
+## Adversarial audit — 2026-10-18
+
+The offline falsification audit exposed acceptance of a null-UID
+Pod -> ReplicaSet -> Deployment ownership chain.
+
+Implementation correction: require nonempty resource and controller
+reference UIDs before using owner-reference equality.
+
+The synthetic positive fixture initially omitted Deployment selectors.
+The fixture and validator now require selector evidence, including
+simple matchLabels-to-template consistency.
+
+Deployment readyReplicas can disagree with a separately observed
+Pod list. The P1 semantic fingerprint continues to preserve the
+reported count. No post-hoc count-equality rule has been added.
+
+Cross-resource observation consistency, generation/resourceVersion
+provenance, and full Kubernetes schema validation remain open
+collector-level engineering requirements.
+
+This is a pre-execution validator correction, not a change to the
+frozen Gate-2 protocol or a claim of experimental success.

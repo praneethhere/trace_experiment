@@ -56,6 +56,10 @@ def _resource_map(snapshot: Mapping[str, Any], key: str, namespace: str, errors:
         if name in result:
             errors.append(f"{key}/{name}: duplicate name")
             continue
+        uid = meta.get("uid")
+        if not isinstance(uid, str) or not uid.strip():
+            errors.append(f"{key}/{name}: missing or invalid resource UID")
+            continue
         result[name] = obj
     return result
 
@@ -67,7 +71,14 @@ def _controller(obj: Mapping[str, Any], kind: str) -> tuple[str, str] | None:
     refs = [r for r in refs if r.get("kind") == kind and r.get("controller") is True]
     if len(refs) != 1:
         return None
-    return refs[0].get("name", ""), refs[0].get("uid", "")
+    name = refs[0].get("name")
+    uid = refs[0].get("uid")
+    if (
+        not isinstance(name, str) or not name
+        or not isinstance(uid, str) or not uid.strip()
+    ):
+        return None
+    return name, uid
 
 
 def _pod_deployment(pod: Mapping[str, Any], replicasets: Mapping[str, dict], deployments: Mapping[str, dict]) -> str | None:
@@ -147,6 +158,28 @@ def evaluate_p1(snapshot: Mapping[str, Any]) -> P1Result:
         if type(ready) is not int or ready <= 0:
             errors.append(f"{name}: readyReplicas missing, zero, or invalid")
         labels = spec.get("template", {}).get("metadata", {}).get("labels", {})
+        deployment_selector = spec.get("selector")
+        valid_selector = (
+            isinstance(deployment_selector, dict)
+            and (
+                (
+                    isinstance(deployment_selector.get("matchLabels"), dict)
+                    and bool(deployment_selector["matchLabels"])
+                )
+                or (
+                    isinstance(deployment_selector.get("matchExpressions"), list)
+                    and bool(deployment_selector["matchExpressions"])
+                )
+            )
+        )
+        if not valid_selector:
+            errors.append(f"{name}: Deployment selector missing or invalid")
+        elif isinstance(deployment_selector.get("matchLabels"), dict):
+            if not isinstance(labels, dict) or any(
+                labels.get(k) != v
+                for k, v in deployment_selector["matchLabels"].items()
+            ):
+                errors.append(f"{name}: Deployment selector/template mismatch")
         if labels.get("service-route") != "frontend":
             errors.append(f"{name}: pod template missing injected service-route label")
         state[name] = {"desired": desired, "ready": ready}
