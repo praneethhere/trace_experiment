@@ -14,7 +14,8 @@ Parent commit: `f039049`
 Parent SHA-256:
 `a5e77dbbc08869f07fdd1f2e5c2b4a7e343e44fe970913ae6e908611c3b0d562`
 
-Current implementation checkpoint: `9134519`
+Evidence-layer checkpoint: `9134519`.
+P3 comparator proposal commit: `2736527`.
 
 This is a prospective measurement clarification following
 independent adversarial review.
@@ -263,3 +264,100 @@ This document must remain a draft until:
 6. The original protocol remains intact and deviations are recorded.
 7. The independent methodological review is reconciled.
 8. No Gate-2 outcome has been observed before amendment freeze.
+
+## 9. Prospective decision-resolution review
+
+STATUS: PROPOSED — NOT FROZEN — NOT EXECUTION-AUTHORIZING.
+
+These recommendations require an explicit pre-outcome
+methodological decision. They do not silently amend the parent.
+
+### R1. Primary equivalence claim
+
+Propose defining a Gate-2 PASS as equivalence under the
+predeclared candidate-specific Layer-C fields only.
+
+Layer-B structural differences must be reported independently.
+
+The parent research question mentions structural equivalence,
+but the formal pairwise rule only compares Layer C.
+This discrepancy must be explicitly resolved before execution.
+
+No claim of complete recovery-starting-state equivalence
+is authorized merely because Layer C matches.
+
+### R2. Candidate comparators
+
+Propose exact, typed canonical equality for every required
+field enumerated in the parent protocol.
+
+P1: retain the existing frozen semantic fields.
+P2: worker ranks and other required topology relations
+must use the frozen rank-normalization rules.
+P3: core authentication and cart replacement fields remain
+mandatory. Decide explicitly which proposed EndpointSlice
+histogram fields belong in Layer C versus Layer B.
+P4: retain exact quota and admission-state requirements.
+
+Absent or malformed evidence cannot silently receive defaults.
+
+### R3. Quiescence
+
+Retain the parent requirement of three consecutive
+true manifestation observations, two seconds apart,
+within the 120-second harness-side boundary.
+
+Equal semantic hashes across those observations are NOT
+currently required by the parent. Adding that requirement
+would be a prospective protocol change.
+
+Propose checking that the final captured evidence still
+supports the manifestation predicate, without introducing
+an additional settling interval.
+
+### R4. Measurement-system failures
+
+Retain the parent's four terminal episode classes.
+
+Propose distinguishing measurement-system failure using
+a reason code under PROTOCOL_VIOLATION when an inadmissible
+capture prevents trustworthy interpretation.
+
+Genuine benchmark non-manifestation remains
+RECREATION_FAILURE.
+
+External Docker, KIND, or host failure remains
+INFRASTRUCTURE_FAILURE.
+
+The exact precedence for multiple observed failure causes
+must be specified and tested before freezing.
+
+No affected scheduled episode may be silently replaced.
+
+### R5. Collection and retry budget
+
+No retry-to-success is permitted.
+
+Before freezing, specify an exact collector read sequence,
+watch-continuity requirement, timeout and fixed retry budget.
+
+A matching two-capture resourceVersion bracket alone
+cannot establish atomic state across Kubernetes kinds.
+
+Test the proposed method on synthetic observations and
+a separate non-candidate environment before any Gate-2 fault.
+
+### R6. Required adversarial decisions
+
+Before freezing, test:
+
+- exact typed equality and missing semantic fields;
+- P3 endpoint conditions, duplication and excluded configuration;
+- persistent predicate truth with changing semantic values;
+- loss of predicate truth at final capture;
+- failed LIST, stale data and watch-continuity failure;
+- measurement-system versus recreation versus infrastructure failure;
+- competing terminal failure causes and campaign precedence;
+- Layer-B divergence despite equal Layer-C fingerprints.
+
+No P1-P4 incident execution is authorized by these tests.
